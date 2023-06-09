@@ -58,7 +58,10 @@ public class LogCommand extends Command {
 
         // View subcommand
         this.subCommands.add(new SubcommandData("view", "Shows a user's dose log")
-                .addOptions(new OptionData(OptionType.USER, "user", "See another user's log"))
+                .addOptions(
+                        new OptionData(OptionType.USER, "user", "See another user's log", false),
+                        new OptionData(OptionType.INTEGER, "year", "Specify a year to view logged doses", false).setMinValue(2023)
+                )
         );
     }
 
@@ -84,7 +87,7 @@ public class LogCommand extends Command {
 
         // Update log in database
         Bson filter = Filters.eq("user", userID);
-        Bson update = Updates.addToSet("doses", entry);
+        Bson update = Updates.addToSet("doses." + DrugSafe.getCurrentYear(), entry);
         bot.database.logs.updateOne(filter, update, Database.UPSERT);
 
         // Reply with embed (ephemeral if hidden)
@@ -101,12 +104,22 @@ public class LogCommand extends Command {
         OptionMapping userOption = event.getOption("user");
         User user = (userOption != null) ? userOption.getAsUser() : event.getUser();
 
-        // Get log from database
+        // Get year
+        OptionMapping yearOption = event.getOption("year");
+        String year = (yearOption != null) ? yearOption.getAsString() : DrugSafe.getCurrentYear();
+
+        // Get log from database (with error checking)
         Log log = bot.database.logs.find(Filters.eq("user", user.getIdLong())).first();
         if (log == null || log.getDoses().isEmpty()) {
-            event.replyEmbeds(EmbedUtils.createError("That user has not yet logged any doses!")).setEphemeral(true).queue();
+            String error = (user.getIdLong() == event.getUser().getIdLong()) ? "You have not yet logged any doses!" : "The user <@"+user.getIdLong()+"> has not yet logged any doses!";
+            event.replyEmbeds(EmbedUtils.createError(error)).setEphemeral(true).queue();
+            return;
+        } else if (!log.getDoses().containsKey(year)) {
+            event.replyEmbeds(EmbedUtils.createError("The year **"+year+"** does not yet have any logged doses!")).setEphemeral(true).queue();
             return;
         }
-        event.replyEmbeds(log.getDoses().get(0).getEmbed(user.getIdLong())).queue();
+
+        // Show log as an embed
+        event.replyEmbeds(log.getEmbed(user, year)).queue();
     }
 }

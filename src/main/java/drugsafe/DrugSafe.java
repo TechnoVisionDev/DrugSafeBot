@@ -10,6 +10,11 @@ import net.dv8tion.jda.api.sharding.ShardManager;
 import org.jetbrains.annotations.NotNull;
 
 import javax.security.auth.login.LoginException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.Year;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Main class for DrugSafe Discord Bot.
@@ -63,5 +68,13 @@ public class DrugSafe {
         } catch (LoginException e) {
             System.out.println("ERROR: Provided bot token is invalid!");
         }
+    }
+
+    /**
+     * Formats the current year as a string.
+     * @return current year as string
+     */
+    public static String getCurrentYear() {
+        return String.valueOf(Calendar.getInstance().get(Calendar.YEAR));
     }
 }

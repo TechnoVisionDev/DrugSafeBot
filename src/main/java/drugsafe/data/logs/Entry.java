@@ -14,7 +14,7 @@ import java.util.Date;
  */
 public class Entry {
 
-    private static final DecimalFormat format = new DecimalFormat("#,###.##");
+    private static final DecimalFormat numberFormat = new DecimalFormat("#,###.##");
 
     private String drug;
 
@@ -50,11 +50,17 @@ public class Entry {
                 .setTitle("New Dose Logged")
                 .addField("User", "<@"+ userID +">", false)
                 .addField("Drug", drug, false)
-                .addField("Amount", format.format(dose) + " " + units, true)
+                .addField("Amount", numberFormat.format(dose) + " " + units, true)
                 .addField("Route", route.substring(0, 1).toUpperCase() + route.substring(1), true)
                 .setThumbnail("https://cdn-icons-png.flaticon.com/512/6134/6134622.png")
                 .setTimestamp(date.toInstant())
                 .build();
+    }
+
+    @Override
+    public String toString() {
+        return drug + " " + numberFormat.format(dose) + " " + units
+                + " (" + route.substring(0, 1).toUpperCase() + route.substring(1) + ")";
     }
 
     public String getDrug() {
