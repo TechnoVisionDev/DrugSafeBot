@@ -70,6 +70,11 @@ public class LogCommand extends Command {
                 .addOptions(new OptionData(OptionType.INTEGER, "id", "The ID of the logged dose", true).setMinValue(1))
                 .addOptions(new OptionData(OptionType.INTEGER, "year", "Specify the year to remove logged dose from", false).setMinValue(2023))
         );
+
+        // Reset subcommand
+        this.subCommands.add(new SubcommandData("reset", "Resets your entire log or a specified year")
+                .addOptions(new OptionData(OptionType.INTEGER, "year", "Specify which year to reset log data", false).setMinValue(2023))
+        );
     }
 
     @Override
@@ -78,6 +83,7 @@ public class LogCommand extends Command {
             case "add" -> executeAdd(event);
             case "view" -> executeView(event);
             case "remove" -> executeRemove(event);
+            case "reset" -> executeReset(event);
         }
     }
 
@@ -169,5 +175,30 @@ public class LogCommand extends Command {
         EmbedBuilder embed = removedEntry.getEmbed(userID);
         embed.setTitle("Dose #"+(index+1)+" Removed");
         event.replyEmbeds(embed.build()).queue();
+    }
+
+    /**
+     * Resets a user's entire log or a specific year.
+     */
+    private void executeReset(SlashCommandInteractionEvent event) {
+        // Get command data
+        long userID = event.getUser().getIdLong();
+        OptionMapping yearOption = event.getOption("year");
+        Bson filter = Filters.eq("user", userID);
+
+        // Reset entire log in database (if year not specified)
+        if (yearOption == null) {
+            bot.database.logs.deleteOne(filter);
+            String reply = ":wastebasket: <@"+userID+"> has reset their entire dose log!";
+            event.replyEmbeds(EmbedUtils.createDefault(reply)).queue();
+            return;
+        }
+
+        // Reset a specified year for log in database
+        String year = yearOption.getAsString();
+        Bson update = Updates.unset("doses."+year);
+        bot.database.logs.updateOne(filter, update);
+        String reply = ":wastebasket: <@"+userID+"> has reset their dose log for the year "+year+".";
+        event.replyEmbeds(EmbedUtils.createDefault(reply)).queue();
     }
 }
