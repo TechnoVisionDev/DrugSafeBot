@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.entities.User;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -37,26 +38,36 @@ public class Log {
      * Creates an embed to display log data.
      * @param user the user whose log is being displayed.
      * @param year the year to display logged doses for.
-     * @return a MessageEmbed with log data.
+     * @return a list of MessageEmbeds with log data.
      */
-    public MessageEmbed getEmbed(User user, String year) {
+    public List<MessageEmbed> getEmbed(User user, String year) {
         // Get entries for the specified year
         List<Entry> dosesThisYear = doses.get(year);
+        List<MessageEmbed> pages = new ArrayList<>();
 
-        // Create log embed
+        // Initialize EmbedBuilder for the first page
         EmbedBuilder embed = new EmbedBuilder()
                 .setColor(EmbedColor.DEFAULT.color)
                 .setTitle("Dose Log ("+year+")")
                 .setThumbnail("https://cdn-icons-png.flaticon.com/512/3209/3209027.png")
                 .setFooter(user.getAsTag(), user.getEffectiveAvatarUrl());
 
-        // Loop over entries for the current year and add to embed
-        for (int i = dosesThisYear.size()-1; i >= 0; i--) {
+        // Loop over entries for the current year in reverse order and add to embed
+        for (int i = dosesThisYear.size() - 1, fieldCount = 0; i >= 0; i--, fieldCount++) {
+            // Check if we've hit the field limit for the current embed
+            if (fieldCount != 0 && fieldCount % 5 == 0) {
+                // If we have, build the current embed, add it to the list, and start a new one
+                pages.add(embed.build());
+                embed = new EmbedBuilder()
+                        .setColor(EmbedColor.DEFAULT.color)
+                        .setTitle("Dose Log ("+year+")")
+                        .setThumbnail("https://cdn-icons-png.flaticon.com/512/3209/3209027.png")
+                        .setFooter(user.getAsTag(), user.getEffectiveAvatarUrl());
+            }
             // Format date
             Entry entry = dosesThisYear.get(i);
-            int id = i+1;
             LocalDateTime localDate = entry.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-            String formattedDate = "[" + id + "] " + localDate.format(formatter.withLocale(Locale.US));
+            String formattedDate = "[" + (dosesThisYear.size() - fieldCount) + "] " + localDate.format(formatter.withLocale(Locale.US));
 
             // insert the day suffix after the day of month
             String daySuffix = getDayOfMonthSuffix(localDate.getDayOfMonth());
@@ -66,7 +77,9 @@ public class Log {
             // Add to embed as field
             embed.addField(formattedDate, entry.toString(), false);
         }
-        return embed.build();
+        // Add last page
+        pages.add(embed.build());
+        return pages;
     }
 
     /**

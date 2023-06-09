@@ -2,6 +2,7 @@ package drugsafe;
 
 import drugsafe.commands.CommandRegistry;
 import drugsafe.data.Database;
+import drugsafe.listeners.PaginationListener;
 import io.github.cdimascio.dotenv.Dotenv;
 import net.dv8tion.jda.api.OnlineStatus;
 import net.dv8tion.jda.api.entities.Activity;
@@ -10,11 +11,7 @@ import net.dv8tion.jda.api.sharding.ShardManager;
 import org.jetbrains.annotations.NotNull;
 
 import javax.security.auth.login.LoginException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.Year;
 import java.util.Calendar;
-import java.util.Date;
 
 /**
  * Main class for DrugSafe Discord Bot.
@@ -46,12 +43,15 @@ public class DrugSafe {
         builder.setStatus(OnlineStatus.ONLINE);
         builder.setActivity(Activity.watching("drugsafe.info"));
 
+        // Add commands and listeners
         CommandRegistry commandRegistry = new CommandRegistry(this);
-        builder.addEventListeners(commandRegistry);
-
-        shardManager = builder.build();
+        builder.addEventListeners(
+                commandRegistry,
+                new PaginationListener()
+        );
 
         // Register the commands as global commands
+        shardManager = builder.build();
         shardManager.getShards().forEach(jda -> {
             jda.updateCommands().addCommands(commandRegistry.unpackCommandData()).queue();
         });

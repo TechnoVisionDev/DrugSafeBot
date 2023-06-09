@@ -11,12 +11,6 @@ import org.jetbrains.annotations.NotNull;
  */
 public class EmbedUtils {
 
-    /** Custom Emojis. */
-    public static final String GREEN_TICK = "<:green_tick:800555917472825418>";
-    public static final String BLUE_TICK = "<:blue_tick:800623774293819413>";
-    public static final String RED_X = "<:red_x:800554807164665916>";
-    public static final String BLUE_X = "<:blue_x:800623785736798228>";
-
     /**
      * Quickly creates a simple error embed.
      *
@@ -52,7 +46,7 @@ public class EmbedUtils {
     public static @NotNull MessageEmbed createSuccess(String message) {
         return new EmbedBuilder()
                 .setColor(EmbedColor.SUCCESS.color)
-                .setDescription(GREEN_TICK + " " + message)
+                .setDescription(":white_check_mark: " + message)
                 .build();
     }
 }

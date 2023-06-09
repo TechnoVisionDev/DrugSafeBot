@@ -8,17 +8,21 @@ import drugsafe.commands.Command;
 import drugsafe.data.Database;
 import drugsafe.data.logs.Entry;
 import drugsafe.data.logs.Log;
+import drugsafe.listeners.PaginationListener;
 import drugsafe.util.embeds.EmbedUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
 import org.bson.conversions.Bson;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Command that logs a drug dose to the user's log.
@@ -134,8 +138,12 @@ public class LogCommand extends Command {
             event.replyEmbeds(EmbedUtils.createError("The year **"+year+"** does not yet have any logged doses!")).setEphemeral(true).queue();
             return;
         }
-        // Show log as an embed
-        event.replyEmbeds(log.getEmbed(user, year)).queue();
+
+        // Send paginated log
+        List<MessageEmbed> embeds = log.getEmbed(user, year);
+        ReplyCallbackAction action = event.replyEmbeds(embeds.get(0));
+        if (embeds.size() == 1) { action.queue(); }
+        else { PaginationListener.sendPaginatedMenu(user.getId(), action, embeds); }
     }
 
     /**
@@ -174,6 +182,7 @@ public class LogCommand extends Command {
         // Reply with embed of removed dose
         EmbedBuilder embed = removedEntry.getEmbed(userID);
         embed.setTitle("Dose #"+(index+1)+" Removed");
+        embed.setThumbnail("https://cdn-icons-png.flaticon.com/512/2427/2427634.png");
         event.replyEmbeds(embed.build()).queue();
     }
 
