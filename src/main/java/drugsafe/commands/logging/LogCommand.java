@@ -9,6 +9,7 @@ import drugsafe.data.Database;
 import drugsafe.data.logs.Entry;
 import drugsafe.data.logs.Log;
 import drugsafe.util.embeds.EmbedUtils;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -63,6 +64,12 @@ public class LogCommand extends Command {
                         new OptionData(OptionType.INTEGER, "year", "Specify a year to view logged doses", false).setMinValue(2023)
                 )
         );
+
+        // Remove subcommand
+        this.subCommands.add(new SubcommandData("remove", "Removes a dose by ID from your log")
+                .addOptions(new OptionData(OptionType.INTEGER, "id", "The ID of the logged dose", true).setMinValue(1))
+                .addOptions(new OptionData(OptionType.INTEGER, "year", "Specify the year to remove logged dose from", false).setMinValue(2023))
+        );
     }
 
     @Override
@@ -70,6 +77,7 @@ public class LogCommand extends Command {
         switch(event.getSubcommandName()) {
             case "add" -> executeAdd(event);
             case "view" -> executeView(event);
+            case "remove" -> executeRemove(event);
         }
     }
 
@@ -93,7 +101,7 @@ public class LogCommand extends Command {
         // Reply with embed (ephemeral if hidden)
         OptionMapping hide = event.getOption("hide");
         boolean isEphemeral = hide != null && hide.getAsBoolean();
-        event.replyEmbeds(entry.getEmbed(userID)).setEphemeral(isEphemeral).queue();
+        event.replyEmbeds(entry.getEmbed(userID).build()).setEphemeral(isEphemeral).queue();
     }
 
     /**
@@ -111,15 +119,55 @@ public class LogCommand extends Command {
         // Get log from database (with error checking)
         Log log = bot.database.logs.find(Filters.eq("user", user.getIdLong())).first();
         if (log == null || log.getDoses().isEmpty()) {
+            // Error: User does not yet have any data logged
             String error = (user.getIdLong() == event.getUser().getIdLong()) ? "You have not yet logged any doses!" : "The user <@"+user.getIdLong()+"> has not yet logged any doses!";
             event.replyEmbeds(EmbedUtils.createError(error)).setEphemeral(true).queue();
             return;
-        } else if (!log.getDoses().containsKey(year)) {
+        } else if (!log.getDoses().containsKey(year) || log.getDoses().get(year).isEmpty()) {
+            // Error: year does not yet have any data logged
             event.replyEmbeds(EmbedUtils.createError("The year **"+year+"** does not yet have any logged doses!")).setEphemeral(true).queue();
             return;
         }
-
         // Show log as an embed
         event.replyEmbeds(log.getEmbed(user, year)).queue();
+    }
+
+    /**
+     * Removes a logged dose from the user's log by ID.
+     */
+    private void executeRemove(SlashCommandInteractionEvent event) {
+        // Get command data
+        int index = event.getOption("id").getAsInt() - 1;
+        long userID = event.getUser().getIdLong();
+
+        // Get year
+        OptionMapping yearOption = event.getOption("year");
+        String year = (yearOption != null) ? yearOption.getAsString() : DrugSafe.getCurrentYear();
+
+        // Get log from database
+        Bson filter = Filters.eq("user", userID);
+        Log log = bot.database.logs.find(filter).first();
+
+        // Error checking
+        if (log == null || log.getDoses().isEmpty()) {
+            event.replyEmbeds(EmbedUtils.createError("You have not yet logged any doses!")).setEphemeral(true).queue();
+            return;
+        } else if (!log.getDoses().containsKey(year) || log.getDoses().get(year).isEmpty()) {
+            event.replyEmbeds(EmbedUtils.createError("The year **"+year+"** does not yet have any logged doses!")).setEphemeral(true).queue();
+            return;
+        } else if (log.getDoses().get(year).size() <= index) {
+            event.replyEmbeds(EmbedUtils.createError("That ID does not exist! Use `/log view` to see valid dose IDs.")).setEphemeral(true).queue();
+            return;
+        }
+
+        // Update log in database
+        Entry removedEntry = log.getDoses().get(year).remove(index);
+        Bson update = Updates.pull("doses." + year, removedEntry);
+        bot.database.logs.updateOne(filter, update);
+
+        // Reply with embed of removed dose
+        EmbedBuilder embed = removedEntry.getEmbed(userID);
+        embed.setTitle("Dose #"+(index+1)+" Removed");
+        event.replyEmbeds(embed.build()).queue();
     }
 }

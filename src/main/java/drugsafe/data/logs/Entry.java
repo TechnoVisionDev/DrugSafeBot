@@ -44,7 +44,7 @@ public class Entry {
         this.date = date;
     }
 
-    public MessageEmbed getEmbed(long userID) {
+    public EmbedBuilder getEmbed(long userID) {
         return new EmbedBuilder()
                 .setColor(EmbedColor.DEFAULT.color)
                 .setTitle("New Dose Logged")
@@ -53,8 +53,7 @@ public class Entry {
                 .addField("Amount", numberFormat.format(dose) + " " + units, true)
                 .addField("Route", route.substring(0, 1).toUpperCase() + route.substring(1), true)
                 .setThumbnail("https://cdn-icons-png.flaticon.com/512/6134/6134622.png")
-                .setTimestamp(date.toInstant())
-                .build();
+                .setTimestamp(date.toInstant());
     }
 
     @Override
