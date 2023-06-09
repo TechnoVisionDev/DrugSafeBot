@@ -1,18 +1,13 @@
 package drugsafe.data.logs;
 
-import drugsafe.DrugSafe;
 import drugsafe.util.embeds.EmbedColor;
-import drugsafe.util.embeds.EmbedUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -22,7 +17,7 @@ import java.util.Map;
  */
 public class Log {
 
-    public static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM d - h:mm a");
+    public static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM d - ");
 
     private long user;
 
@@ -48,8 +43,7 @@ public class Log {
         // Initialize EmbedBuilder for the first page
         EmbedBuilder embed = new EmbedBuilder()
                 .setColor(EmbedColor.DEFAULT.color)
-                .setTitle("Dose Log ("+year+")")
-                .setThumbnail("https://cdn-icons-png.flaticon.com/512/3209/3209027.png")
+                .setTitle(":pencil: Dose Log ("+year+")")
                 .setFooter(user.getAsTag(), user.getEffectiveAvatarUrl());
 
         // Loop over entries for the current year in reverse order and add to embed
@@ -60,22 +54,19 @@ public class Log {
                 pages.add(embed.build());
                 embed = new EmbedBuilder()
                         .setColor(EmbedColor.DEFAULT.color)
-                        .setTitle("Dose Log ("+year+")")
-                        .setThumbnail("https://cdn-icons-png.flaticon.com/512/3209/3209027.png")
+                        .setTitle(":pencil: Dose Log ("+year+")")
                         .setFooter(user.getAsTag(), user.getEffectiveAvatarUrl());
             }
             // Format date
             Entry entry = dosesThisYear.get(i);
-            LocalDateTime localDate = entry.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-            String formattedDate = "[" + (dosesThisYear.size() - fieldCount) + "] " + localDate.format(formatter.withLocale(Locale.US));
-
-            // insert the day suffix after the day of month
-            String daySuffix = getDayOfMonthSuffix(localDate.getDayOfMonth());
-            int index = formattedDate.indexOf("-");
-            formattedDate = new StringBuilder(formattedDate).insert(index - 1, daySuffix).toString();
+            long timestampTime = entry.getDate().toInstant().getEpochSecond();
+            String formattedDate = "**[" + (dosesThisYear.size() - fieldCount) + "] "
+                    + "<t:"+timestampTime+":D>"
+                    + " - " + "<t:"+timestampTime+":t>**";;
 
             // Add to embed as field
-            embed.addField(formattedDate, entry.toString(), false);
+            //embed.addField(formattedDate, entry.toString(), false);
+            embed.appendDescription(formattedDate + "\n" + entry.toString() + "\n\n");
         }
         // Add last page
         pages.add(embed.build());
