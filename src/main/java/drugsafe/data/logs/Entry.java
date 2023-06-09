@@ -2,10 +2,11 @@ package drugsafe.data.logs;
 
 import drugsafe.util.embeds.EmbedColor;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 
 import java.text.DecimalFormat;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * POJO object that stores a single logged dose
@@ -13,6 +14,15 @@ import java.util.Date;
  * @author TechnoVision
  */
 public class Entry {
+
+    public static final Map<String, String> routeEmojis  = new HashMap<>() {{
+        put("oral", ":lips:");
+        put("smoked", ":smoking:");
+        put("insufflated", ":nose:");
+        put("rectal", ":peach:");
+        put("intravenous", ":syringe:");
+        put("other", ":question:");
+    }};
 
     private static final DecimalFormat numberFormat = new DecimalFormat("#,###.##");
 
@@ -51,15 +61,14 @@ public class Entry {
                 .addField("User", "<@"+ userID +">", false)
                 .addField("Drug", drug, false)
                 .addField("Amount", numberFormat.format(dose) + " " + units, true)
-                .addField("Route", route.substring(0, 1).toUpperCase() + route.substring(1), true)
+                .addField("Route", routeEmojis.get(route) + " " + route.substring(0, 1).toUpperCase() + route.substring(1), true)
                 .setThumbnail("https://cdn-icons-png.flaticon.com/512/6134/6134622.png")
                 .setTimestamp(date.toInstant());
     }
 
     @Override
     public String toString() {
-        return drug + " " + numberFormat.format(dose) + " " + units
-                + " (" + route.substring(0, 1).toUpperCase() + route.substring(1) + ")";
+        return drug + " " + numberFormat.format(dose) + units + " " + routeEmojis.get(route);
     }
 
     public String getDrug() {

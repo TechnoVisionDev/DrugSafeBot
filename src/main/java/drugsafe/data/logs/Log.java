@@ -5,7 +5,6 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +15,6 @@ import java.util.Map;
  * @author TechnoVision
  */
 public class Log {
-
-    public static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM d - ");
 
     private long user;
 
@@ -64,9 +61,8 @@ public class Log {
                     + "<t:"+timestampTime+":D>"
                     + " - " + "<t:"+timestampTime+":t>**";;
 
-            // Add to embed as field
-            //embed.addField(formattedDate, entry.toString(), false);
-            embed.appendDescription(formattedDate + "\n" + entry.toString() + "\n\n");
+            // Add to embed description
+            embed.appendDescription(formattedDate + "\n" + entry + "\n\n");
         }
         // Add last page
         pages.add(embed.build());
