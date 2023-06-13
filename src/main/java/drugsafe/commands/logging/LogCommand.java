@@ -39,7 +39,7 @@ public class LogCommand extends Command {
         this.autocomplete = Arrays.asList("Alcohol", "Amphetamine", "Benzodiazepines", "Cannabis", "Cocaine", "DMT", "DXM", "GBL", "GHB", "Ketamine", "Heroin", "Kratom", "LSD", "MDMA", "Methamphetamine", "Mushrooms", "Modafinil", "Nicotine", "Oxycodone", "2C-B");
 
         // Add subcommand
-        this.subCommands.add(new SubcommandData("add", "Adds a new drug dose to your log")
+        this.subCommands.add(new SubcommandData("add", "Add a new drug dose to your log")
                 .addOptions(
                         new OptionData(OptionType.STRING, "drug", "The name of the drug taken", true).setAutoComplete(true),
                         new OptionData(OptionType.NUMBER, "dose", "The amount of the drug taken", true),
@@ -62,7 +62,7 @@ public class LogCommand extends Command {
         );
 
         // View subcommand
-        this.subCommands.add(new SubcommandData("view", "Shows a user's dose log")
+        this.subCommands.add(new SubcommandData("view", "View your full dose log")
                 .addOptions(
                         new OptionData(OptionType.USER, "user", "See another user's log", false),
                         new OptionData(OptionType.INTEGER, "year", "Specify a year to view logged doses", false).setMinValue(2023)
@@ -70,13 +70,13 @@ public class LogCommand extends Command {
         );
 
         // Remove subcommand
-        this.subCommands.add(new SubcommandData("remove", "Removes a dose by ID from your log")
+        this.subCommands.add(new SubcommandData("remove", "Remove a dose by ID from your log")
                 .addOptions(new OptionData(OptionType.INTEGER, "id", "The ID of the logged dose", true).setMinValue(1))
                 .addOptions(new OptionData(OptionType.INTEGER, "year", "Specify the year to remove logged dose from", false).setMinValue(2023))
         );
 
         // Reset subcommand
-        this.subCommands.add(new SubcommandData("reset", "Resets your entire log or a specified year")
+        this.subCommands.add(new SubcommandData("reset", "Reset your entire log or a specified year")
                 .addOptions(new OptionData(OptionType.INTEGER, "year", "Specify which year to reset log data", false).setMinValue(2023))
         );
     }

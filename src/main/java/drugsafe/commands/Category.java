@@ -7,7 +7,8 @@ package drugsafe.commands;
  * @author TechnoVision
  */
 public enum Category {
-    LOGGING(":pencil:", "Logging");
+    LOGGING(":pencil:", "Logging"),
+    UTILITY(":tools:", "Utility");
 
     public final String emoji;
     public final String name;
