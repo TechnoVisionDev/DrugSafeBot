@@ -23,7 +23,7 @@ public class InviteCommand extends Command {
 
     @Override
     public void execute(SlashCommandInteractionEvent event) {
-        Button b1 = Button.link("https://discord.com/oauth2/authorize?client_id=1117987531535949836&scope=bot&permissions=2147795009", "Invite Bot");
+        Button b1 = Button.link("https://discord.com/oauth2/authorize?client_id=1116516703497621555&scope=bot&permissions=311361", "Invite Bot");
         Button b2 = Button.link("https://discord.gg/SWrb3MHVCd", "DrugSafe Server");
         event.replyEmbeds(EmbedUtils.createDefault(":robot: Click the button below to add me to your server!"))
                 .addActionRow(b1, b2).queue();
