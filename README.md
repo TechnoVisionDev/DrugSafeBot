@@ -29,7 +29,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/TechnoVisionDev/DrugSafeBot">
-    <img src="https://i.imgur.com/EXlIpl3.png" alt="Logo" width="80" height="80">
+    <img src="https://cdn-icons-png.flaticon.com/512/4320/4320344.png" alt="Logo" width="80" height="80">
   </a>
 
   <h3 align="center">DrugSafe Discord Bot</h3>
