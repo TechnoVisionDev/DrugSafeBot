@@ -2,6 +2,7 @@ package drugsafe.commands;
 
 import drugsafe.DrugSafe;
 import drugsafe.commands.logging.LogCommand;
+import drugsafe.commands.util.HelpCommand;
 import drugsafe.commands.util.InviteCommand;
 import drugsafe.util.embeds.EmbedUtils;
 import net.dv8tion.jda.api.Permission;
@@ -44,7 +45,8 @@ public class CommandRegistry extends ListenerAdapter {
                 new LogCommand(bot),
 
                 // Utility commands
-                new InviteCommand(bot)
+                new InviteCommand(bot),
+                new HelpCommand(bot)
         );
     }
 
