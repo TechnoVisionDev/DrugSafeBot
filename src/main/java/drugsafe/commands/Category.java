@@ -7,6 +7,8 @@ package drugsafe.commands;
  * @author TechnoVision
  */
 public enum Category {
+
+    INFORMATION(":brain:", "Information"),
     LOGGING(":blue_book:", "Logging"),
     UTILITY(":tools:", "Utility");
 

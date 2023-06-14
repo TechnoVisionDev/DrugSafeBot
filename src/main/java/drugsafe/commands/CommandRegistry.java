@@ -1,6 +1,7 @@
 package drugsafe.commands;
 
 import drugsafe.DrugSafe;
+import drugsafe.commands.information.InfoCommand;
 import drugsafe.commands.logging.LogCommand;
 import drugsafe.commands.util.HelpCommand;
 import drugsafe.commands.util.InviteCommand;
@@ -41,6 +42,9 @@ public class CommandRegistry extends ListenerAdapter {
      */
     public CommandRegistry(DrugSafe bot) {
         mapCommand(
+                //Information commands
+                new InfoCommand(bot),
+
                 // Logging commands
                 new LogCommand(bot),
 
